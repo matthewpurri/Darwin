@@ -1,0 +1,6 @@
+
+fishing
+catch
+small
+large
+caught
