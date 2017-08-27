@@ -32,7 +32,8 @@ def checkFolder(s, k):
     Purpose:
     - Check to see if folder exists
     """
-    folder_path = 'C:/Users/Matthew/Documents/Projects/Darwin/Web Scraper/Dataset/'
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    folder_path = dir_path+'/Dataset/'
     if(k == ''):
         k = 'none'
     if(not os.path.exists(folder_path+s)):
