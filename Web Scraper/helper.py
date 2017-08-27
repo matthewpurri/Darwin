@@ -2,6 +2,7 @@ import os
 import urllib.request, urllib.error
 import time
 import sys
+import http.client
 
 def readTextFile(filename):
     """
@@ -104,7 +105,7 @@ def downloadImages(items, species, keyword):
 
                 print("Downloaded: {}".format(filename))
 
-            except httplib.IncompleteRead as e:
+            except http.client.IncompleteRead as e:
                 e.partial
                 print("Incomplete read on image: {}".format(filename))
 
