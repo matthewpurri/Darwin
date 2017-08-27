@@ -1,9 +1,9 @@
-### Project Darwin
+# Project Darwin
 
 ## Goals
 
-# Web Scraper
+### Web Scraper
 
-# Image classifier
+### Image classifier
 
-# Phone Application 
+### Phone Application 
