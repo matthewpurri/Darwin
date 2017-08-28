@@ -8,6 +8,7 @@ import sys
 import glob
 import pickle
 
+
 def getFolderNames(path):
     p = Path(path)
     subdirectories = [x for x in p.iterdir() if x.is_dir()]
@@ -48,7 +49,7 @@ class Selector_GUI(tk.Tk):
         container.pack()
         self.frames = {}
 
-        for F in (StartPage, SelectorPage):
+        for F in (StartPage, SelectorPage, CreateDataset):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -70,6 +71,10 @@ class StartPage(tk.Frame):
                                 command=lambda: controller.showFrame(SelectorPage))
         button_mark_images.grid(row=2, column=0, sticky='nsew')
 
+        button_create_dataset = ttk.Button(self, text="Create Dataset",
+                                command=lambda: controller.showFrame(CreateDataset))
+        button_create_dataset.grid(row=3, column=0, sticky='nsew')
+
 
 class SelectorPage(tk.Frame):
 
@@ -81,6 +86,7 @@ class SelectorPage(tk.Frame):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
         self.folder_path = dir_path+'/Dataset/'
+
         species_names = getFolderNames(self.folder_path)
         species_names.insert(0,"Select")
         self.var_species = tk.StringVar()
@@ -97,9 +103,6 @@ class SelectorPage(tk.Frame):
 
         button_quit = ttk.Button(self, text="Quit", command=quit)
         button_quit.grid(row=6, column=0)
-
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.folder_path = dir_path+'/Dataset/'
 
         # Images
         self.label_example = None
@@ -177,9 +180,11 @@ class SelectorPage(tk.Frame):
             save_file = self.folder_path + self.species + '.pickle'
             with open(save_file, 'wb') as f:
                 pickle.dump(self.img_mark, f)
-            print("Species complete!")
+            print("Data saved to: {}".format(save_file))
+            self.state = self.state + 1
+        elif(self.state + 1 > self.img_list_length):
+            pass
         else:
-            print(self.state, self.img_list_length)
             # Save mark to dictionary
             image_path = self.img_list[self.state]
             self.img_mark[image_path] = mark
@@ -210,6 +215,33 @@ class SelectorPage(tk.Frame):
         else:
             status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
             self.status_label.config(text=status_text)
+
+
+class CreateDataset(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        label = ttk.Label(self, text="Select a species:")
+        label.grid(row=0, column=0)
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.folder_path = dir_path+'/Dataset/'
+
+        run_button = ttk.Button(self, text="Create", command=self.qf)
+        run_button.grid(row=1, column=0)
+
+        button_back = ttk.Button(self, text="Back",
+                            command=lambda: controller.showFrame(StartPage))
+        button_back.grid(row=2, column=0)
+
+        button_quit = ttk.Button(self, text="Quit", command=quit)
+        button_quit.grid(row=3, column=0)
+
+    def qf(self):
+        folders = getFolderNames(self.folder_path)
+        data = pickle.load( open( self.folder_path + folders[0] + '.pickle', "rb" ))
+        print(data)
 
 app = Selector_GUI()
 app.mainloop()
