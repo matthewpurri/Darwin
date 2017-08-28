@@ -7,8 +7,6 @@ from PIL import Image, ImageTk
 import sys
 import glob
 
-# https://www.youtube.com/watch?v=lt78_05hHSk
-
 def getFolderNames(path):
     p = Path(path)
     subdirectories = [x for x in p.iterdir() if x.is_dir()]
@@ -19,9 +17,15 @@ def getFolderNames(path):
 
 def loadImage(path):
     image = cv2.imread(path)
-    image = cv2.resize(image, (250,250))
-    b,g,r = cv2.split(image)
-    img = cv2.merge((r,g,b))
+    try:
+        image = cv2.resize(image, (250,250))
+    except:
+        return None
+    try:
+        b,g,r = cv2.split(image)
+        img = cv2.merge((r,g,b))
+    except:
+        img = image
 
     im = Image.fromarray(img)
     imgtk = ImageTk.PhotoImage(image=im)
@@ -30,9 +34,6 @@ def loadImage(path):
 def getImageNames(folder_path):
     files_string = folder_path+'/*.jpg'
     filenames = glob.glob(files_string)
-    # names = []
-    # for filename in filenames:
-    #     names.append(os.path.basename(filename))
     return filenames
 
 class Selector_GUI(tk.Tk):
@@ -103,16 +104,20 @@ class SelectorPage(tk.Frame):
         self.label_example = None
         self.label_test = None
 
-        self.state = 0
-
     def Selector(self):
+        self.state = 0
         self.species = self.var_species.get()
         if(self.species == "Select"):
             print("Please select a class")
         else:
             ttk.Label(self, text="Question image").grid(row=2, column=2)
-            img_list = self.getImageList()
-            self.showImage(img_list[self.state])
+            self.img_list = self.getImageList()
+            self.showImage(self.img_list[self.state])
+
+            # Create buttons
+            self.button_good = ttk.Button(self, text="Good", command=self.goodImage).grid(row=4, column=2)
+            self.button_bad = ttk.Button(self, text="Bad", command=self.badImage).grid(row=5, column=2)
+            self.button_previous = ttk.Button(self, text="Previous", command=self.prevImage).grid(row=4, column=1)
 
     def showExample(self, *args):
         tk.Label(self, text="Example image of species").grid(row=2, column=1)
@@ -160,6 +165,31 @@ class SelectorPage(tk.Frame):
             image_list = image_list + img_names
 
         return image_list
+
+    def goodImage(self):
+        self.state = self.state + 1
+        image_path = self.img_list[self.state]
+        self.showImage(self.img_list[self.state])
+        self.updateTxtFile(image_path, 'Good')
+
+    def badImage(self):
+        self.state = self.state + 1
+        image_path = self.img_list[self.state]
+        self.showImage(self.img_list[self.state])
+        self.updateTxtFile(image_path, 'Bad')
+
+    def prevImage(self):
+        if(self.state == 0):
+            pass
+        else:
+            self.state = self.state - 1
+            image_path = self.img_list[self.state]
+            self.showImage(self.img_list[self.state])
+            self.updateTxtFile(image_path, 'Previous')
+
+    def updateTxtFile(self, image_path, code):
+        print(code)
+
 
 app = Selector_GUI()
 app.mainloop()
