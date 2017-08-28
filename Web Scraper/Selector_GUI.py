@@ -189,6 +189,7 @@ class SelectorPage(tk.Frame):
 
     def updateTxtFile(self, image_path, code):
         print(code)
+        print(code)
 
 
 app = Selector_GUI()
