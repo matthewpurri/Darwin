@@ -6,6 +6,7 @@ import cv2
 from PIL import Image, ImageTk
 import sys
 import glob
+import pickle
 
 def getFolderNames(path):
     p = Path(path)
@@ -110,21 +111,29 @@ class SelectorPage(tk.Frame):
         if(self.species == "Select"):
             print("Please select a class")
         else:
+            # Create text file
+            self.img_txt_file = self.folder_path + self.species + '/mark_images.txt'
+
+            self.img_mark = {}
+
             ttk.Label(self, text="Question image").grid(row=2, column=2)
             self.img_list = self.getImageList()
+            self.img_list_length = len(self.img_list)
             self.showImage(self.img_list[self.state])
 
             # Create buttons
-            self.button_good = ttk.Button(self, text="Good", command=self.goodImage).grid(row=4, column=2)
-            self.button_bad = ttk.Button(self, text="Bad", command=self.badImage).grid(row=5, column=2)
+            self.button_good = ttk.Button(self, text="Good", command=lambda: self.markImage('Good')).grid(row=4, column=2)
+            self.button_bad = ttk.Button(self, text="Bad", command=lambda: self.markImage('Bad')).grid(row=5, column=2)
             self.button_previous = ttk.Button(self, text="Previous", command=self.prevImage).grid(row=4, column=1)
+
+            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
+            self.status_label = tk.Label(self, text=status_text)
+            self.status_label.grid(row=4, column=3)
 
     def showExample(self, *args):
         tk.Label(self, text="Example image of species").grid(row=2, column=1)
-        species = self.var_species.get()
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        folder_path = dir_path+'/Dataset/'
-        example_path = folder_path+species+'/example.jpg'
+        self.species = self.var_species.get()
+        example_path = self.folder_path + self.species+'/example.jpg'
 
         # Show example image for species
         ex_img = loadImage(example_path)
@@ -147,16 +156,11 @@ class SelectorPage(tk.Frame):
             self.label_test.image = img
 
     def getImageList(self):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        folder_path = dir_path+'/Dataset/'
-
         # Find keword folder paths and save to a dictionary
         species_path = self.folder_path+ '/' + self.species
         keywords = getFolderNames(species_path)
 
         image_list = []
-        # keyword_filename = keyword_path+ '/' + 'test.txt'
-        # image_txt_file = open(keyword_filename, 'w')
 
         # For all folders in species
         for kw in keywords:
@@ -166,31 +170,46 @@ class SelectorPage(tk.Frame):
 
         return image_list
 
-    def goodImage(self):
-        self.state = self.state + 1
-        image_path = self.img_list[self.state]
-        self.showImage(self.img_list[self.state])
-        self.updateTxtFile(image_path, 'Good')
-
-    def badImage(self):
-        self.state = self.state + 1
-        image_path = self.img_list[self.state]
-        self.showImage(self.img_list[self.state])
-        self.updateTxtFile(image_path, 'Bad')
+    def markImage(self, mark):
+        if(self.state + 1 == self.img_list_length):
+            # Pickle dictionary
+            self.updateStatus()
+            save_file = self.folder_path + self.species + '.pickle'
+            with open(save_file, 'wb') as f:
+                pickle.dump(self.img_mark, f)
+            print("Species complete!")
+        else:
+            print(self.state, self.img_list_length)
+            # Save mark to dictionary
+            image_path = self.img_list[self.state]
+            self.img_mark[image_path] = mark
+            # Increment state
+            self.state = self.state + 1
+            self.updateStatus()
+            image_path = self.img_list[self.state]
+            # Show new image
+            self.showImage(self.img_list[self.state])
 
     def prevImage(self):
-        if(self.state == 0):
-            pass
-        else:
+        if(self.state != 0):
+            # Decrement state
             self.state = self.state - 1
+            self.updateStatus()
+            # Get previous image
             image_path = self.img_list[self.state]
+            # Show previous image
             self.showImage(self.img_list[self.state])
-            self.updateTxtFile(image_path, 'Previous')
+            # Overwrite previous key
+            self.img_mark[image_path] = "overwrite"
 
-    def updateTxtFile(self, image_path, code):
-        print(code)
-        print(code)
-
+    def updateStatus(self):
+        if(self.state + 1 == self.img_list_length):
+            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
+            self.status_label.config(text=status_text)
+            self.status_label.config(bg='Green')
+        else:
+            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
+            self.status_label.config(text=status_text)
 
 app = Selector_GUI()
 app.mainloop()
