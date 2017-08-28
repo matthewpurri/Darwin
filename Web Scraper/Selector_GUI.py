@@ -4,13 +4,13 @@ from pathlib import Path
 import os
 import cv2
 from PIL import Image, ImageTk
+import sys
+import glob
 
 # https://www.youtube.com/watch?v=lt78_05hHSk
 
-def getSpeciesNames():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    folder_path = dir_path+'/Dataset/'
-    p = Path(folder_path)
+def getFolderNames(path):
+    p = Path(path)
     subdirectories = [x for x in p.iterdir() if x.is_dir()]
     names = []
     for path in subdirectories:
@@ -26,6 +26,14 @@ def loadImage(path):
     im = Image.fromarray(img)
     imgtk = ImageTk.PhotoImage(image=im)
     return imgtk
+
+def getImageNames(folder_path):
+    files_string = folder_path+'/*.jpg'
+    filenames = glob.glob(files_string)
+    # names = []
+    # for filename in filenames:
+    #     names.append(os.path.basename(filename))
+    return filenames
 
 class Selector_GUI(tk.Tk):
 
@@ -66,14 +74,16 @@ class SelectorPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
-        label = ttk.Label(self, text="Selector a species:")
+        label = ttk.Label(self, text="Select a species:")
         label.grid(row=0, column=0)
 
-        species_names = getSpeciesNames()
-
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.folder_path = dir_path+'/Dataset/'
+        species_names = getFolderNames(self.folder_path)
+        species_names.insert(0,"Select")
         self.var_species = tk.StringVar()
         self.var_species.set(species_names[0])
-        menu_species = ttk.OptionMenu(self, self.var_species, *species_names)
+        menu_species = ttk.OptionMenu(self, self.var_species, *species_names, command=self.showExample)
         menu_species.grid(row=1,column=0, sticky='nsew')
 
         run_button = ttk.Button(self, text="Run", command=self.Selector)
@@ -86,14 +96,26 @@ class SelectorPage(tk.Frame):
         button_quit = ttk.Button(self, text="Quit", command=quit)
         button_quit.grid(row=6, column=0)
 
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.folder_path = dir_path+'/Dataset/'
+
         # Images
         self.label_example = None
-        self.label_current = None
+        self.label_test = None
 
-        ttk.Label(self, text="Example image of species").grid(row=2, column=1)
-        ttk.Label(self, text="Question image").grid(row=2, column=2)
+        self.state = 0
 
     def Selector(self):
+        self.species = self.var_species.get()
+        if(self.species == "Select"):
+            print("Please select a class")
+        else:
+            ttk.Label(self, text="Question image").grid(row=2, column=2)
+            img_list = self.getImageList()
+            self.showImage(img_list[self.state])
+
+    def showExample(self, *args):
+        tk.Label(self, text="Example image of species").grid(row=2, column=1)
         species = self.var_species.get()
         dir_path = os.path.dirname(os.path.realpath(__file__))
         folder_path = dir_path+'/Dataset/'
@@ -109,16 +131,35 @@ class SelectorPage(tk.Frame):
             self.label_example.configure(image=ex_img)
             self.label_example.image = ex_img
 
+    def showImage(self, image_path):
+        img = loadImage(image_path)
+        if(self.label_test==None):
+            self.label_test = tk.Label(self, image=img)
+            self.label_test.grid(row=3, column=2, sticky='nsew')
+            self.label_test.image=img
+        else:
+            self.label_test.configure(image=img)
+            self.label_test.image = img
+
+    def getImageList(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        folder_path = dir_path+'/Dataset/'
+
         # Find keword folder paths and save to a dictionary
+        species_path = self.folder_path+ '/' + self.species
+        keywords = getFolderNames(species_path)
+
+        image_list = []
+        # keyword_filename = keyword_path+ '/' + 'test.txt'
+        # image_txt_file = open(keyword_filename, 'w')
 
         # For all folders in species
-            # Create a txt document
-            # For all images in a folder
-                # View image
-                # button is pushed
-                # When button pushed it adds to the txt file
+        for kw in keywords:
+            keyword_path = species_path+ '/' + kw
+            img_names = getImageNames(keyword_path)
+            image_list = image_list + img_names
 
-
+        return image_list
 
 app = Selector_GUI()
 app.mainloop()
