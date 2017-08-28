@@ -177,7 +177,7 @@ class SelectorPage(tk.Frame):
         if(self.state + 1 == self.img_list_length):
             # Pickle dictionary
             self.updateStatus()
-            save_file = self.folder_path + self.species + '.pickle'
+            save_file = self.folder_path + self.species + '/' + self.species + '.pickle'
             with open(save_file, 'wb') as f:
                 pickle.dump(self.img_mark, f)
             print("Data saved to: {}".format(save_file))
@@ -209,11 +209,11 @@ class SelectorPage(tk.Frame):
 
     def updateStatus(self):
         if(self.state + 1 == self.img_list_length):
-            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
+            status_text = "Status: " + str(self.state) + ' / ' + str(self.img_list_length)
             self.status_label.config(text=status_text)
             self.status_label.config(bg='Green')
         else:
-            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
+            status_text = "Status: " + str(self.state) + ' / ' + str(self.img_list_length)
             self.status_label.config(text=status_text)
 
 
