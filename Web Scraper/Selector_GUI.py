@@ -85,7 +85,7 @@ class SelectorPage(tk.Frame):
         label.grid(row=0, column=0)
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.folder_path = dir_path+'/RawData/'
+        self.folder_path = dir_path+'/Dataset/'
 
         species_names = getFolderNames(self.folder_path)
         species_names.insert(0,"Select")
@@ -226,22 +226,61 @@ class CreateDataset(tk.Frame):
         label.grid(row=0, column=0)
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.folder_path = dir_path+'/RawData/'
+        self.folder_path = dir_path+'/Dataset/'
 
-        run_button = ttk.Button(self, text="Create", command=self.qf)
-        run_button.grid(row=1, column=0)
+        sift_button = ttk.Button(self, text="Sift Images", command=self.siftImages)
+        sift_button.grid(row=1, column=0)
+
+        split_button = ttk.Button(self, text="Split Data", command=self.splitDataset)
+        sift_button.grid(row=2, column=0)
 
         button_back = ttk.Button(self, text="Back",
                             command=lambda: controller.showFrame(StartPage))
-        button_back.grid(row=2, column=0)
+        button_back.grid(row=3, column=0)
 
         button_quit = ttk.Button(self, text="Quit", command=quit)
-        button_quit.grid(row=3, column=0)
+        button_quit.grid(row=4, column=0)
 
-    def qf(self):
+    def siftImages(self):
+        status_label = tk.Label(self, text="Loading")
+        status_label.grid(row=1, column=1)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        data_folder = dir_path+'/Structured_Data/'
+        if not os.path.exists(data_folder):
+            os.makedirs(data_folder)
+
         folders = getFolderNames(self.folder_path)
-        data = pickle.load( open( self.folder_path + folders[0] + '/' + folders[0] + '.pickle', "rb" ))
-        print(data)
+
+        for species in folders:
+            status_text = "Species: " + species
+            status_label.config(text=status_text)
+
+            # Sub folder for species
+            species_path = data_folder + species
+            if not os.path.exists(species_path):
+                os.makedirs(species_path)
+            data = pickle.load( open( self.folder_path + species + '/' + species + '.pickle', "rb" ))
+
+            # Get good images
+            good_images = []
+            for paths in data:
+                if(data[paths] == 'Good'):
+                    good_images.append(paths)
+
+            # Save good images
+            for i, org_path in enumerate(good_images):
+                # Open image
+                img = cv2.imread(org_path)
+                sized_img = cv2.resize(img, (150,150))
+
+                # Find path of img
+                new_path = data_folder + species + '/img_' + str(i) + '.jpg'
+                cv2.imwrite(new_path, sized_img)
+
+        status_label.config(text="Complete!")
+
+    def splitDataset(self):
+        pass
 
 app = Selector_GUI()
 app.mainloop()

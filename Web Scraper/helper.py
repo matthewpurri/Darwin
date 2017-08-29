@@ -33,7 +33,7 @@ def checkFolder(s, k):
     - Check to see if folder exists
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    folder_path = dir_path+'/RawData/'
+    folder_path = dir_path+'/Dataset/'
     if(k == ''):
         k = 'none'
     if(not os.path.exists(folder_path+s)):
@@ -92,7 +92,7 @@ def _images_get_next_item(s):
 def downloadImages(items, species, keyword):
     if(keyword == ''):
         keyword = 'none'
-    folder_path = 'C:/Users/Matthew/Documents/Projects/Darwin/Web Scraper/RawData/' + species + '/' + keyword
+    folder_path = 'C:/Users/Matthew/Documents/Projects/Darwin/Web Scraper/Dataset/' + species + '/' + keyword
     for i, img in enumerate(items):
         filename = folder_path+'/img_'+str(i)+'.jpg'
         try:
