@@ -209,11 +209,11 @@ class SelectorPage(tk.Frame):
 
     def updateStatus(self):
         if(self.state + 1 == self.img_list_length):
-            status_text = "Status: " + str(self.state) + ' / ' + str(self.img_list_length)
+            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
             self.status_label.config(text=status_text)
             self.status_label.config(bg='Green')
         else:
-            status_text = "Status: " + str(self.state) + ' / ' + str(self.img_list_length)
+            status_text = "Status: " + str(self.state+1) + ' / ' + str(self.img_list_length)
             self.status_label.config(text=status_text)
 
 
@@ -240,7 +240,7 @@ class CreateDataset(tk.Frame):
 
     def qf(self):
         folders = getFolderNames(self.folder_path)
-        data = pickle.load( open( self.folder_path + folders[0] + '.pickle', "rb" ))
+        data = pickle.load( open( self.folder_path + folders[0] + '/' + folders[0] + '.pickle', "rb" ))
         print(data)
 
 app = Selector_GUI()
