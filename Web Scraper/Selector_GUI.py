@@ -85,7 +85,7 @@ class SelectorPage(tk.Frame):
         label.grid(row=0, column=0)
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.folder_path = dir_path+'/Dataset/'
+        self.folder_path = dir_path+'/RawData/'
 
         species_names = getFolderNames(self.folder_path)
         species_names.insert(0,"Select")
@@ -226,7 +226,7 @@ class CreateDataset(tk.Frame):
         label.grid(row=0, column=0)
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.folder_path = dir_path+'/Dataset/'
+        self.folder_path = dir_path+'/RawData/'
 
         run_button = ttk.Button(self, text="Create", command=self.qf)
         run_button.grid(row=1, column=0)
